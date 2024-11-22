@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <!-- Link to your CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <a href="/home">Home</a>
+        {% if 'user' in session %}
+            <a href="/logout">Logout</a>
+            {% if session['user'] == 'teacher' %}
+                <a href="/teacher_dashboard">Dashboard</a>
+            {% else %}
+                <a href="/student_dashboard/{{ session['user'] }}">Dashboard</a>
+            {% endif %}
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+        {% endif %}
+    </nav>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

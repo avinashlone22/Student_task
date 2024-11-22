@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h1>{{ task[1] }}</h1> <!-- Task Name -->
+        <h3>Status: {{ task[2] }}</h3> <!-- Task Status -->
+        <h3>Deadline: {{ task[5] }}</h3> <!-- Task Deadline -->
+
+        {% if task[2] == 'Submitted' %}
+            <h3>Description: {{ task[3] }}</h3> <!-- Task Description -->
+
+            {% if task[4] %}
+                <p><strong>Submitted File:</strong> <a href="{{ url_for('static', filename=task[4]) }}" target="_blank">View File</a></p>
+            {% else %}
+                <p>No file submitted yet.</p>
+            {% endif %}
+        {% else %}
+            <!-- When the task status is not 'Submitted', show the submission form -->
+            <form method="POST" enctype="multipart/form-data">
+                <div>
+                    <label for="description">Description:</label>
+                    <textarea name="description" required>{{ task[3] if task[2] == 'Submitted' else '' }}</textarea>
+                </div>
+
+                <div>
+                    <label for="file">Upload File:</label>
+                    <input type="file" name="file">
+                </div>
+
+                <button type="submit">Submit</button>
+            </form>
+        {% endif %}
+    </div>
+{% endblock %}

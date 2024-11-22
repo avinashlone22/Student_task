@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <!-- Dashboard Title -->
+    <center><h1>Teacher Dashboard</h1></center>
+    <center><h2>Assign a Task to Students</h2></center>
+
+    <!-- Flexbox Container for Assign Task and Search Form Side by Side -->
+    <div class="row">
+
+        <center>  
+            <div class="container mt-5">
+                <a href="{{ url_for('view_students') }}" class="btn btn-primary view-btn">View All Students</a>
+            </div>
+        </center>
+        
+        <!-- Assign Task Form -->
+        <div class="col-md-6">
+            <form method="POST">
+                <div class="form-group">
+                    <label for="task" class="form-label">Task Name:</label>
+                    <input type="text" id="task" name="task" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="deadline" class="form-label">Deadline:</label>
+                    <input type="datetime-local" id="deadline" name="deadline" class="form-control" required>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary mt-3">Assign Task</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Search Student Form -->
+        <div class="col-md-6">
+            <center><h2>Search Student By Roll No.</h2></center>
+            <form method="GET" action="{{ url_for('teacher_dashboard') }}" class="form-inline mb-3">
+                <input type="text" name="search_roll_number" class="form-control mr-2" placeholder="Enter Roll Number" value="{{ search_roll_number or '' }}">
+                <button type="submit" class="btn btn-primary">Search</button>
+                <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-secondary ml-2">Reset</a>
+            </form>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Display Assigned Tasks -->
+    <center><h2>Assigned Tasks</h2></center>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Student</th>
+                    <th>Task</th>
+                    <th>Status</th>
+                    <th>Deadline</th>
+                    <th>Description</th>
+                    <th>Submitted File</th>
+                    <th>Remark</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task, user in tasks %}
+                <tr>
+                    <td>{{ user.roll_number }}</td> <!-- Roll Number from User -->
+                    <td>{{ task.student_name }}</td> <!-- Student Name -->
+                    <td>{{ task.task }}</td> <!-- Task Name -->
+                    <td>{{ task.status }}</td> <!-- Task Status -->
+                    <td>{{ task.deadline }}</td> <!-- Deadline -->
+                    <td>{{ task.description if task.description else 'Not Provided' }}</td> <!-- Description -->
+                    <td>
+                        {% if task.file_path %}
+                            <a href="{{ url_for('view_task_file', task_id=task.id) }}">View File</a>
+                        {% else %}
+                            Pending
+                        {% endif %}
+                    </td>
+                    <td>
+                        <!-- Form to update remark -->
+                        <form method="POST" action="{{ url_for('update_remark', task_id=task.id) }}">
+                            <textarea name="remark" rows="2" class="form-control">{{ task.remark }}</textarea>
+                            <button type="submit" class="btn btn-primary mt-2">Update</button>
+                        </form>
+                    </td>
+                    <td>
+                        <!-- Delete Task Button -->
+                        <form method="POST" action="{{ url_for('delete_task', task_id=task.id) }}" onsubmit="return confirmDelete();">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            
+        </table>
+    </div>
+
+    <!-- Confirmation for Task Deletion -->
+    <script>
+        function confirmDelete() {
+            return confirm("Are you sure you want to delete this task?");
+        }
+    </script>
+
+    <style>
+        /* Style the input field */
+        #task {
+            width: 80%;         /* Set the width of the input */
+            margin-bottom: 20px; /* Add margin at the bottom */
+            padding: 10px;      /* Add padding for better spacing */
+            font-size: 16px;    /* Adjust font size */
+        }
+
+        /* Style the View All Students button */
+        .view-btn {
+            padding: 10px 20px; /* Add padding around the button */
+            font-size: 16px;    /* Set a custom font size */
+            background-color: #007bff; /* Custom background color */
+            border: none;       /* Remove the border */
+            color: white;       /* Set text color to white */
+            border-radius: 5px; /* Rounded corners */
+            text-align: center; /* Center align text */
+            display: inline-block; /* Display as inline-block */
+            text-decoration: none; /* Remove underline */
+        }
+
+        .view-btn:hover {
+            background-color: #0056b3; /* Darker shade on hover */
+            color: #ffffff; /* Ensure text stays white on hover */
+            cursor: pointer; /* Change cursor to pointer */
+        }
+    </style>
+</div>
+{% endblock %}

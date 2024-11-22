@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}
+View All Students
+{% endblock %}
+
+{% block content %}
+<center><h1 class="text-center mb-4">All Students</h1></center>
+
+<!-- Search Form -->
+<form action="{{ url_for('view_students2') }}" method="POST" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="search_query" class="form-control" placeholder="Search by Roll Number" 
+               value="{{ request.form.get('search_query', '') }}">
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </div>
+</form>
+
+<!-- Students Table -->
+<table class="table table-bordered table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th>Roll Number</th>
+            <th>Student Name</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for student in students %}
+        <tr>
+            <td>{{ student.roll_number }}</td>
+            <td>{{ student.username }}</td>
+            <td>
+                <form action="{{ url_for('delete_student', student_id=student.id) }}" method="POST" onsubmit="return confirmDelete();">
+                    <!-- Hidden input to simulate DELETE method -->
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="3" class="text-center">No students found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    function confirmDelete() {
+        return confirm("Are you sure you want to delete this student?");
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <center><h1>Welcome, {{ session['user'] }}</h1></center>
+    <center><h3>Your Tasks</h3></center>
+
+    {% if tasks %}
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Task Name</th>
+                <th>Deadline</th>
+                <th>Description & File</th>
+                <th>Remark</th>
+                <th>View Submitted File</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr>
+                <!-- Task Name -->
+                <td>{{ task.task }}</td>  <!-- Replace task[1] with task.name -->
+
+                <!-- Task Deadline -->
+                <td>{{ task.deadline }}</td>  <!-- Replace task[5] with task.deadline -->
+
+                <!-- Action Button (to trigger form visibility) -->
+                <td>
+                    <button class="btn-update" data-task-id="{{ task.id }}" data-task-description="{{ task.description if task.description else '' }}">
+                        Action
+                    </button>
+
+                    <!-- Form for submission or update (hidden initially) -->
+                    <div class="task-form" id="form-{{ task.id }}" style="display:none;">
+                        <form method="POST" action="{{ url_for('submit_task', task_id=task.id) }}" enctype="multipart/form-data">
+                            <div>
+                                <label for="description">Description:</label>
+                                <textarea name="description" required>{{ task.description if task.description else '' }}</textarea>
+                            </div>
+                            <div>
+                                <label for="file">Upload File:</label>
+                                <input type="file" name="file">
+                            </div>
+                            {% if task.status == 'Pending' %}
+                                <button type="submit" id="submitBtn">Submit Task</button>
+                            {% else %}
+                                <button type="submit" id="updateBtn">Update Task</button>
+                            {% endif %}
+                        </form>
+                    </div>
+                </td>
+
+                <!-- Remark from Teacher -->
+                <td>
+                    {% if task.remark %}
+                        <p>{{ task.remark }}</p>  <!-- Replace task[6] with task.remark -->
+                    {% else %}
+                        <p>No remark yet.</p>
+                    {% endif %}
+                </td>
+         
+
+            <td>
+                {% if task.file_path %}
+                    <a href="{{ url_for('view_task_file', task_id=task.id) }}" class="btn btn-primary">View File</a>
+                {% else %}
+                    Pending
+                {% endif %}
+            </td>   </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No tasks available.</p>
+    {% endif %}
+</div>
+
+<script>
+    // Open form when the action button is clicked
+    document.querySelectorAll('.btn-update').forEach(button => {
+        button.addEventListener('click', function() {
+            var taskId = this.getAttribute('data-task-id');
+            var form = document.getElementById('form-' + taskId);
+
+            // Toggle visibility of the form (show/hide)
+            if (form.style.display === "none") {
+                form.style.display = "block";
+            } else {
+                form.style.display = "none";
+            }
+        });
+    });
+</script>
+{% endblock %}
