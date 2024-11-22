@@ -5,19 +5,21 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
 
 application = Flask(__name__)
 application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///avi.db'
 db = SQLAlchemy(application)
 
-application.secret_key = 'your_secret_key_here'  # Replace with your actual secret key
+
+application.secret_key = os.getenv('FLASK_SECRET_KEY', 'your_secret_key_here')
+
 
 # File upload configuration
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
-# Recommended for Elastic Beanstalk
+UPLOAD_FOLDER = '/tmp/uploads'  # Recommended writable directory for Elastic Beanstalk
+  # Recommended for Elastic Beanstalk
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 # Database Models
@@ -37,6 +39,15 @@ class Task(db.Model):
     file_path = db.Column(db.String(255))
     deadline = db.Column(db.String(50))
     remark = db.Column(db.String(255))
+
+# Utility function to query the database
+def query_db(query, args=(), one=False):
+    with sqlite3.connect(DATABASE) as conn:
+        cursor = conn.cursor()
+        cursor.execute(query, args)
+        conn.commit()
+        rv = cursor.fetchall()
+        return (rv[0] if rv else None) if one else rv
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -81,13 +92,14 @@ def login():
             return redirect('/teacher_dashboard')
 
         # Student login
-        user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password, password):
+        user = User.query.filter_by(username=username, password=password).first()
+        if user:
             session['user'] = username
             return redirect(url_for('student_dashboard', student_name=username))
 
         flash('Invalid credentials. Try again.', 'danger')
     return render_template('login.html')
+
 
 @application.route('/register', methods=['GET', 'POST'])
 def register():
@@ -109,8 +121,7 @@ def register():
             flash('This roll number is already taken!', 'danger')
             return redirect(url_for('register'))
 
-        hashed_password = generate_password_hash(password)
-        new_user = User(username=username, password=hashed_password, roll_number=roll_number)
+        new_user = User(username=username, password=password, roll_number=roll_number)
         db.session.add(new_user)
         db.session.commit()
         flash('Registration successful! Please login.', 'success')
@@ -132,6 +143,7 @@ def view_students2():
         students = User.query.all()
     return render_template('students.html', students=students)
 
+
 @application.route('/delete_student/<int:student_id>', methods=['POST'])
 def delete_student(student_id):
     if request.form.get('_method') == 'DELETE':
@@ -143,6 +155,7 @@ def delete_student(student_id):
             return redirect(url_for('view_students'))
         flash('Student not found!', 'danger')
     return redirect(url_for('view_students'))
+
 
 @application.route('/submit_task/<int:task_id>', methods=['POST'])
 def submit_task(task_id):
@@ -171,6 +184,7 @@ def submit_task(task_id):
     
     flash('Task not found!', 'danger')
     return redirect(url_for('student_dashboard', student_name=task.student_name))
+
 
 @application.route('/teacher_dashboard', methods=['GET', 'POST'])
 def teacher_dashboard():
@@ -228,6 +242,7 @@ def teacher_dashboard():
         s_r=s_r,
     )
 
+
 @application.route('/update_remark/<int:task_id>', methods=['POST'])
 def update_remark(task_id):
     if 'user' not in session or session['user'] != 'teacher':
@@ -244,6 +259,7 @@ def update_remark(task_id):
 
     return redirect('/teacher_dashboard')
 
+
 @application.route('/student_dashboard/<student_name>')
 def student_dashboard(student_name):
     if 'user' not in session or session['user'] != student_name:
@@ -251,6 +267,7 @@ def student_dashboard(student_name):
 
     tasks = Task.query.filter_by(student_name=student_name).all()
     return render_template('student_dashboard.html', tasks=tasks)
+
 
 @application.route('/view_task_file/<int:task_id>')
 def view_task_file(task_id):
@@ -261,13 +278,15 @@ def view_task_file(task_id):
 
     try:
         return send_from_directory(
-            directory=UPLOAD_FOLDER,  # Serve from the uploads folder
-            path=task.file_path,  # file_path stores the filename
-            as_attachment=False  # Set to True for download instead of view
-        )
+            directory=UPLOAD_FOLDER,
+            filename=task.file_path,
+            as_attachment=False
+)
+
     except FileNotFoundError:
         flash('File not found.', 'danger')
         return redirect(request.referrer)
+
 
 @application.route('/logout')
 def logout():
