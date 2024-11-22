@@ -6,17 +6,17 @@ from datetime import datetime
 from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///avi.db'
-db = SQLAlchemy(app)
+application = Flask(__name__)
+application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///avi.db'
+db = SQLAlchemy(application)
 
-app.secret_key = 'your_secret_key_here'  # Replace with your actual secret key
+application.secret_key = 'your_secret_key_here'  # Replace with your actual secret key
 
 # File upload configuration
-UPLOAD_FOLDER = UPLOAD_FOLDER = '/home/ec2-user/environment/student_task/uploads'  # Replace 'student_task' with your actual project folder
+UPLOAD_FOLDER = UPLOAD_FOLDER = '/home/ec2-user/environment/Student_task/uploads'  # Replace 'student_task' with your actual project folder
   # Update this path for Cloud9
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 # Database Models
@@ -50,19 +50,19 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Routes
-@app.route('/')
+@application.route('/')
 def home1():
     return render_template('home.html')
 
-@app.route('/action')
+@application.route('/action')
 def action():
     return redirect('/student_dashboard')
 
-@app.route('/home')
+@application.route('/home')
 def home():
     return render_template('home.html')
 
-@app.route('/delete_task/<int:task_id>', methods=['POST'])
+@application.route('/delete_task/<int:task_id>', methods=['POST'])
 def delete_task(task_id):
     if 'user' not in session or session['user'] != 'teacher':
         return redirect('/login')
@@ -77,7 +77,7 @@ def delete_task(task_id):
 
     return redirect('/teacher_dashboard')
 
-@app.route('/login', methods=['GET', 'POST'])
+@application.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
@@ -98,7 +98,7 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/register', methods=['GET', 'POST'])
+@application.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form.get('username')
@@ -126,12 +126,12 @@ def register():
 
     return render_template('register.html')
 
-@app.route('/view_students', methods=['GET', 'POST'])
+@application.route('/view_students', methods=['GET', 'POST'])
 def view_students():
     students = User.query.all()
     return render_template('students.html', students=students)
 
-@app.route('/students2', methods=['GET', 'POST'])
+@application.route('/students2', methods=['GET', 'POST'])
 def view_students2():
     search_query = request.form.get('search_query', '')
     if search_query:
@@ -141,7 +141,7 @@ def view_students2():
     return render_template('students.html', students=students)
 
 
-@app.route('/delete_student/<int:student_id>', methods=['POST'])
+@application.route('/delete_student/<int:student_id>', methods=['POST'])
 def delete_student(student_id):
     if request.form.get('_method') == 'DELETE':
         student = User.query.get(student_id)
@@ -154,7 +154,7 @@ def delete_student(student_id):
     return redirect(url_for('view_students'))
 
 
-@app.route('/submit_task/<int:task_id>', methods=['POST'])
+@application.route('/submit_task/<int:task_id>', methods=['POST'])
 def submit_task(task_id):
     task = Task.query.get(task_id)
     if task:
@@ -183,7 +183,7 @@ def submit_task(task_id):
     return redirect(url_for('student_dashboard', student_name=task.student_name))
 
 
-@app.route('/teacher_dashboard', methods=['GET', 'POST'])
+@application.route('/teacher_dashboard', methods=['GET', 'POST'])
 def teacher_dashboard():
     if 'user' not in session or session['user'] != 'teacher':
         return redirect('/login')
@@ -240,7 +240,7 @@ def teacher_dashboard():
     )
 
 
-@app.route('/update_remark/<int:task_id>', methods=['POST'])
+@application.route('/update_remark/<int:task_id>', methods=['POST'])
 def update_remark(task_id):
     if 'user' not in session or session['user'] != 'teacher':
         return redirect('/login')
@@ -257,7 +257,7 @@ def update_remark(task_id):
     return redirect('/teacher_dashboard')
 
 
-@app.route('/student_dashboard/<student_name>')
+@application.route('/student_dashboard/<student_name>')
 def student_dashboard(student_name):
     if 'user' not in session or session['user'] != student_name:
         return redirect('/login')
@@ -266,7 +266,7 @@ def student_dashboard(student_name):
     return render_template('student_dashboard.html', tasks=tasks)
 
 
-@app.route('/view_task_file/<int:task_id>')
+@application.route('/view_task_file/<int:task_id>')
 def view_task_file(task_id):
     task = Task.query.get_or_404(task_id)
     if not task.file_path:
@@ -284,12 +284,12 @@ def view_task_file(task_id):
         return redirect(request.referrer)
 
 
-@app.route('/logout')
+@application.route('/logout')
 def logout():
     session.pop('user', None)
     return redirect(url_for('login'))
 
 if __name__ == '__main__':
-    with app.app_context():
+    with application.app_context():
         db.create_all()
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    application.run(debug=True, host='0.0.0.0', port=8080)
