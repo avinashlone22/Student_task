@@ -1,65 +1,71 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="container mt-5">
-        <h1 class="display-4 text-center mb-4">Welcome to the Teacher-Student Task Management System</h1>
-        
-        <!-- Image Section -->
-        <div class="text-center mb-4">
-            <img src="{{ url_for('static', filename='DALL·E 2024-11-17 23.17.23 - An image for a home page of a Student Task Management System, showcasing a clean and modern design. The image should feature a dashboard with task man.webp') }}" 
-                alt="Home Image" 
-                class="img-fluid" 
-                style="max-width: 60%; height: auto;">
-        </div>
-
-        <p class="lead text-center mb-4">Welcome, {{ session['user'] }}! You can manage your tasks and view the status of assignments here.</p>
-        
-        {% if session['user'] == 'teacher' %}
-            <p class="text-center mb-4">You are logged in as a Teacher. You can assign tasks to students.</p>
-            <div class="text-center">
-                <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-success btn-lg">Go to Teacher Dashboard</a>
-            </div>
-        {% elif session['user'] %}
-            <p class="text-center mb-4">You are logged in as a Student. You can view your tasks and submit assignments here.</p>
-            <div class="text-center">
-                <a href="{{ url_for('student_dashboard', student_name=session['user']) }}" class="btn btn-primary btn-lg">Go to Student Dashboard</a>
-            </div>
-        {% else %}
-            <p class="text-center mb-4">You are not logged in. Please <a href="{{ url_for('login') }}" class="btn btn-warning btn-lg">Login</a> to access the system.</p>
-        {% endif %}
+<div class="container mt-5">
+    <h1 class="display-4 text-center mb-4">Welcome to the Teacher-Student Task Management System</h1>
+    
+    <!-- Image Section -->
+    <div class="text-center mb-4">
+        <img src="{{ url_for('static', filename='DALL-E_2024-11-17_23-17-23_image_for_home_page.webp') }}" 
+             alt="Home Image" 
+             class="img-fluid" 
+             style="max-width: 60%; height: auto;">
     </div>
 
-    <style>
-        /* Custom Styles for Home Page */
-        .container {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        h1 {
-            font-family: 'Arial', sans-serif;
-            font-weight: bold;
-            color: #007bff;
-        }
-        
-        p {
-            font-size: 1.2em;
-            color: #555;    
-        }
-        
-        .btn {
-            margin-top: 20px;
-        }
-        
-        .btn-lg {
-            font-size: 1.1em;
-            padding: 10px 20px;
-        }
-        
-        .text-center {
-            text-align: center;
-        }
-    </style>
+    <p class="lead text-center mb-4">
+        Welcome, {{ session.get('user', 'Guest') }}! You can manage your tasks and view the status of assignments here.
+    </p>
+
+    {% if session.get('user') == 'teacher' %}
+        <p class="text-center mb-4">You are logged in as a Teacher. You can assign tasks to students.</p>
+        <div class="text-center">
+            <a href="{{ url_for('teacher_dashboard') }}" class="btn btn-success btn-lg">Go to Teacher Dashboard</a>
+        </div>
+    {% elif session.get('user') %}
+        <p class="text-center mb-4">You are logged in as a Student. You can view your tasks and submit assignments here.</p>
+        <div class="text-center">
+            <a href="{{ url_for('student_dashboard', student_name=session['user']) }}" class="btn btn-primary btn-lg">Go to Student Dashboard</a>
+        </div>
+    {% else %}
+        <p class="text-center mb-4">
+            You are not logged in. Please 
+            <a href="{{ url_for('login') }}" class="btn btn-warning btn-lg">Login</a> 
+            to access the system.
+        </p>
+    {% endif %}
+</div>
+
+<style>
+    /* Custom Styles for Home Page */
+    .container {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+        font-family: 'Arial', sans-serif;
+        font-weight: bold;
+        color: #007bff;
+    }
+    
+    p {
+        font-size: 1.2em;
+        color: #555;    
+    }
+    
+    .btn {
+        margin-top: 20px;
+    }
+    
+    .btn-lg {
+        font-size: 1.1em;
+        padding: 10px 20px;
+    }
+    
+    .text-center {
+        text-align: center;
+    }
+</style>
 {% endblock %}
