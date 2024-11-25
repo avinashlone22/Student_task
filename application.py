@@ -275,11 +275,12 @@ def view_task_file(task_id):
         return redirect(request.referrer)
 
     try:
+        # Correctly use the 'path' argument for the directory
         return send_from_directory(
-            directory=UPLOAD_FOLDER,
-            filename=task.file_path,
+            directory=application.config['UPLOAD_FOLDER'],  # Path to your upload folder
+            path=task.file_path,  # The filename
             as_attachment=False
-)
+        )
 
     except FileNotFoundError:
         flash('File not found.', 'danger')
@@ -290,6 +291,16 @@ def view_task_file(task_id):
 def logout():
     session.pop('user', None)
     return redirect(url_for('login'))
+
+@application.route('/health')
+def health_check():
+    return "OK", 200
+
+
+@application.route('/')
+def index():
+    return redirect('/home')
+
 
 if __name__ == '__main__':
     with application.app_context():

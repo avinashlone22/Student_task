@@ -29,3 +29,6 @@ artifacts:
   files:
     - '*/'  # Include all files in the output artifact
   discard-paths: no  # Keep the directory structure
+  
+  
+  
