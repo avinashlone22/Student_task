@@ -53,9 +53,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Routes
-@application.route('/')
-def home1():
-    return render_template('home.html')
+
 
 @application.route('/action')
 def action():
