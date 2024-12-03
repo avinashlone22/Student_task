@@ -5,12 +5,7 @@
     <h1 class="display-4 text-center mb-4">Welcome to the Teacher-Student Task Management System</h1>
     
     <!-- Image Section -->
-    <div class="text-center mb-4">
-        <img src="{{ url_for('static', filename='DALL-E_2024-11-17_23-17-23_image_for_home_page.webp') }}" 
-             alt="Home Image" 
-             class="img-fluid" 
-             style="max-width: 60%; height: auto;">
-    </div>
+    
 
     <p class="lead text-center mb-4">
         Welcome, {{ session.get('user', 'Guest') }}! You can manage your tasks and view the status of assignments here.
@@ -48,6 +43,7 @@
         font-family: 'Arial', sans-serif;
         font-weight: bold;
         color: #007bff;
+        margin-bottom: 30px; /* Adjust the value to add more space */
     }
     
     p {
@@ -68,4 +64,5 @@
         text-align: center;
     }
 </style>
+
 {% endblock %}

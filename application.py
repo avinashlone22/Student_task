@@ -155,33 +155,30 @@ def delete_student(student_id):
     return redirect(url_for('view_students'))
 
 
-@application.route('/submit_task/<int:task_id>', methods=['POST'])
+@application.route('/submit_task/<int:task_id>', methods=['GET', 'POST'])
 def submit_task(task_id):
-    task = Task.query.get(task_id)
-    if task:
-        if 'file' not in request.files:
-            flash('No file part', 'danger')
-            return redirect(url_for('student_dashboard', student_name=task.student_name))
-        
-        file = request.files['file']
-        if file.filename == '':
-            flash('No selected file', 'danger')
-            return redirect(url_for('student_dashboard', student_name=task.student_name))
-        
-        if file:
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(UPLOAD_FOLDER, filename)
-            file.save(file_path)
-            
-            task.status = 'Completed'
-            task.file_path = filename
-            db.session.commit()
+    task = Task.query.get_or_404(task_id)
+    if request.method == 'POST':
+        description = request.form.get('description', '').strip()
+        if not description:
+            flash('Description is required.', 'danger')
+            return redirect(request.referrer)
 
-            flash('Task submitted successfully!', 'success')
-            return redirect(url_for('student_dashboard', student_name=task.student_name))
-    
-    flash('Task not found!', 'danger')
-    return redirect(url_for('student_dashboard', student_name=task.student_name))
+        task.description = description
+
+        file = request.files.get('file')
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(application.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            task.file_path = filename
+
+        task.status = 'Submitted'
+        db.session.commit()
+        flash('Task submitted successfully!', 'success')
+        return redirect('/student_dashboard')
+
+    return render_template('submit_task.html', task=task)
 
 
 @application.route('/teacher_dashboard', methods=['GET', 'POST'])
@@ -189,7 +186,7 @@ def teacher_dashboard():
     if 'user' not in session or session['user'] != 'teacher':
         return redirect('/login')
 
-    search_roll_number = None
+    search_roll_number = request.args.get('search_roll_number')
     tasks = []
 
     if request.method == 'POST':
@@ -201,14 +198,13 @@ def teacher_dashboard():
             return redirect(url_for('teacher_dashboard'))
 
         students = User.query.all()
-
         for student in students:
             new_task = Task(
-                student_name=student.username, 
-                task=task_name, 
-                status='Pending', 
-                description=None, 
-                file_path=None, 
+                student_name=student.username,
+                task=task_name,
+                status='Pending',
+                description='',  # Initialize description
+                file_path=None,
                 deadline=deadline
             )
             db.session.add(new_task)
@@ -216,30 +212,12 @@ def teacher_dashboard():
         db.session.commit()
         flash('Task assigned to all students.', 'success')
 
-    if 'search_roll_number' in request.args:
-        search_roll_number = request.args.get('search_roll_number')
-        tasks = (
-            db.session.query(Task, User)
-            .join(User, Task.student_name == User.username)
-            .filter(User.roll_number == search_roll_number)
-            .all()
-        )
+    if search_roll_number:
+        tasks = db.session.query(Task, User).join(User, Task.student_name == User.username).filter(User.roll_number == search_roll_number).all()
     else:
-        tasks = (
-            db.session.query(Task, User)
-            .join(User, Task.student_name == User.username)
-            .all()
-        )
+        tasks = db.session.query(Task, User).join(User, Task.student_name == User.username).all()
 
-    s_r = User.query.all()
-
-    return render_template(
-        'teacher_dashboard.html',
-        tasks=tasks,
-        search_roll_number=search_roll_number,
-        s_r=s_r,
-    )
-
+    return render_template('teacher_dashboard.html', tasks=tasks)
 
 @application.route('/update_remark/<int:task_id>', methods=['POST'])
 def update_remark(task_id):
@@ -258,13 +236,15 @@ def update_remark(task_id):
     return redirect('/teacher_dashboard')
 
 
-@application.route('/student_dashboard/<student_name>')
-def student_dashboard(student_name):
-    if 'user' not in session or session['user'] != student_name:
+@application.route('/student_dashboard')
+def student_dashboard():
+    if 'user' not in session:
         return redirect('/login')
 
+    student_name = session['user']
     tasks = Task.query.filter_by(student_name=student_name).all()
     return render_template('student_dashboard.html', tasks=tasks)
+
 
 
 @application.route('/view_task_file/<int:task_id>')

@@ -2,15 +2,18 @@
 
 {% block content %}
     <div class="container">
-        <h1>{{ task[1] }}</h1> <!-- Task Name -->
-        <h3>Status: {{ task[2] }}</h3> <!-- Task Status -->
-        <h3>Deadline: {{ task[5] }}</h3> <!-- Task Deadline -->
+        <h1>{{ task.task }}</h1> <!-- Task Name -->
+        <h3>Status: {{ task.status }}</h3> <!-- Task Status -->
+        <h3>Deadline: {{ task.deadline }}</h3> <!-- Task Deadline -->
 
-        {% if task[2] == 'Submitted' %}
-            <h3>Description: {{ task[3] }}</h3> <!-- Task Description -->
+        {% if task.status == 'Submitted' %}
+            <h3>Description: {{ task.description }}</h3> <!-- Task Description -->
 
-            {% if task[4] %}
-                <p><strong>Submitted File:</strong> <a href="{{ url_for('static', filename=task[4]) }}" target="_blank">View File</a></p>
+            {% if task.file_path %}
+                <p>
+                    <strong>Submitted File:</strong>
+                    <a href="{{ url_for('view_task_file', task_id=task.id) }}" target="_blank">View File</a>
+                </p>
             {% else %}
                 <p>No file submitted yet.</p>
             {% endif %}
@@ -19,7 +22,7 @@
             <form method="POST" enctype="multipart/form-data">
                 <div>
                     <label for="description">Description:</label>
-                    <textarea name="description" required>{{ task[3] if task[2] == 'Submitted' else '' }}</textarea>
+                    <textarea name="description" required>{{ task.description }}</textarea>
                 </div>
 
                 <div>
