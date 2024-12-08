@@ -7,7 +7,8 @@ from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 application = Flask(__name__, template_folder='templates')
-application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///avi.db'
+base_dir=os.path.abspath(os.path.dirname(__file__))
+application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(base_dir , "avi.db")
 db = SQLAlchemy(application)
 
 
@@ -55,15 +56,15 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Routes
-
+@application.route('/')
+def home():
+    return render_template('home.html')
 
 @application.route('/action')
 def action():
     return redirect('/student_dashboard')
 
-@application.route('/home')
-def home():
-    return render_template('home.html')
+
 
 @application.route('/delete_task/<int:task_id>', methods=['POST'])
 def delete_task(task_id):
