@@ -5,47 +5,32 @@ env:
     SONARCLOUD_ORG: StudentTaskManagementFinal:Host
     PROJECTKEY: StudentTaskManagementFinal:Project
     HOST: StudentTaskManagementFinal:sonartoken
-
+    
 phases:
   install:
     runtime-versions:
       python: 3.9
       java: corretto21
-    commands:
-      - yum update -y
-      - yum install -y jq
-      - retry_count=3
-      - for i in $(seq 1 $retry_count); do wget https://archive.apache.org/dist/maven/maven-3/3.8.6/binaries/apache-maven-3.8.6-bin.tar.gz && break || sleep 10; done
-      - tar xzf apache-maven-3.8.6-bin.tar.gz || true
-      - ln -s apache-maven-3.8.6 maven
-      - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.7.0.2747-linux.zip
-      - unzip ./sonar-scanner-cli-4.7.0.2747-linux.zip
-      - mv sonar-scanner-4.7.0.2747-linux /sonar-scanner
-      - export PATH=$PATH:/sonar-scanner/bin/
-      
-  pre_build:
-  commands:
-    - yum update -y  # Equivalent to apt-get update
-    - yum install -y jq  # Install jq using yum package manager
-    - retry_count=3
-    - for i in $(seq 1 $retry_count); do wget https://archive.apache.org/dist/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz && break || sleep 10; done
-    - tar xzf apache-maven-3.5.4-bin.tar.gz || true
-    - ln -s apache-maven-3.5.4 maven
-    - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip
-    - unzip ./sonar-scanner-cli-3.3.0.1492-linux.zip
-    - mv sonar-scanner-3.3.0.1492-linux /sonar-scanner
-    - export PATH=$PATH:/sonar-scanner/bin/
-    
-build:
-  commands:
-    - find / -name pom.xml -exec mv {} ./pom.xml \; || true  # Moves all pom.xml files to the root directory
-    - mvn sonar:sonar -Dsonar.login=$SONARCLOUD_TOKEN -Dsonar.host.url=$HOST -Dsonar.projectKey=$PROJECTKEY -Dsonar.organization=$SONARCLOUD_ORG
-    - sleep 5
-    - |
-      if curl -s -o /dev/null -w "%{http_code}" https://sonarcloud.io/api/qualitygates/project_status?projectKey=$PROJECTKEY != "200"; then
-        exit 1
-      fi
 
+  pre_build:
+    commands:
+      - yum update -y     # Update the package manager
+      - yum install -y jq # Install jq, a JSON processor
+      - retry_count=3
+      - for i in $(seq 1 $retry_count); do wget https://archive.apache.org/dist/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz && break || sleep 10; done
+      - tar xzf apache-maven-3.5.4-bin.tar.gz || true
+      - ln -s apache-maven-3.5.4 maven
+      - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip
+      - unzip ./sonar-scanner-cli-3.3.0.1492-linux.zip
+      - mv sonar-scanner-3.3.0.1492-linux /sonar-scanner
+      - export PATH=$PATH:/sonar-scanner/bin/
+
+  build:
+    commands:
+      - find / -name pom.xml -exec mv {} ./pom.xml \; || true  
+      - mvn sonar:sonar -Dsonar.login=$SONARCLOUD_TOKEN -Dsonar.host.url=$HOST -Dsonar.projectKey=$PROJECTKEY -Dsonar.organization=$SONARCLOUD_ORG
+      - sleep 5
+      - if curl -s -o /dev/null -w "%{http_code}" https://sonarcloud.io/api/qualitygates/project_status?projectKey=$PROJECTKEY != "200"; then exit 1; fi
 
 artifacts:
    files:
