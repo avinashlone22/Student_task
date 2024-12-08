@@ -6,9 +6,11 @@ from datetime import datetime
 from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 
-application = Flask(__name__)
+application = Flask(__name__, template_folder='templates')
 application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///avi.db'
 db = SQLAlchemy(application)
+
+
 
 
 application.secret_key = os.getenv('FLASK_SECRET_KEY', 'your_secret_key_here')
@@ -286,4 +288,3 @@ if __name__ == '__main__':
     with application.app_context():
         db.create_all()
     application.run(debug=True, host='0.0.0.0', port=8080)
-#jfhdsjfhhuifcyniuenfgyfhbrhfejnjejfnjewnfjnewjfjwefekkk
