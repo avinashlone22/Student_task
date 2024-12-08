@@ -59,6 +59,8 @@ def allowed_file(filename):
 # Routes
 @application.route('/')
 def home():
+    template_path = os.path.join(application.template_folder, 'home.html')
+    print(f"Looking for template at: {template_path}")
     return render_template('home.html')
 
 
@@ -285,6 +287,15 @@ def index():
 @application.route('/health')
 def health_check():
     return "OK", 200
+
+@application.route('/debug')
+def debug():
+    import os
+    return jsonify({
+        'cwd': os.getcwd(),
+        'templates': os.listdir(os.path.join(application.root_path, 'templates')),
+        'static': os.listdir(os.path.join(application.root_path, 'static'))
+    })
 
 
 if __name__ == '__main__':
