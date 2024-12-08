@@ -2,10 +2,10 @@ version: 0.2
 env:
   secrets-manager:
     # SonarCloud keys retrieved from AWS Secrets Manager.
-    SONARCLOUD_TOKEN: StudentTaskAvinash:Organization
-    SONARCLOUD_ORG: StudentTaskAvinash:Host
+    SONARCLOUD_TOKEN: StudentTaskAvinash:sonartoken
+    SONARCLOUD_ORG: StudentTaskAvinash:Organization
     PROJECTKEY: StudentTaskAvinash:Project
-    HOST: StudentTaskAvinash:sonartoken
+    HOST: StudentTaskAvinash:Host
     
 phases:
   install:
