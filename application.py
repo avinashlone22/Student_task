@@ -57,7 +57,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Routes
-@application.route('/')
+@application.route('/home')
 def home():
     template_path = os.path.join(application.template_folder, 'home.html')
     print(f"Looking for template at: {template_path}")
@@ -302,3 +302,6 @@ if __name__ == '__main__':
     with application.app_context():
         db.create_all()
     application.run(debug=True, host='0.0.0.0', port=8080)
+
+
+#dhfhdhfhdwj
