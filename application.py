@@ -13,9 +13,7 @@ db = SQLAlchemy(application)
 
 
 
-application.secret_key = os.getenv('FLASK_SECRET_KEY')
-if not application.secret_key:
-    raise RuntimeError("FLASK_SECRET_KEY environment variable is not set!")
+application.secret_key = os.getenv('FLASK_SECRET_KEY', 'your_secret_key_here')
 
 
 # File upload configuration
@@ -284,14 +282,6 @@ def health_check():
 @application.route('/')
 def index():
     return redirect('/home')
-
-@application.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
-
-@application.errorhandler(500)
-def internal_server_error(e):
-    return render_template('500.html'), 500
 
 
 if __name__ == '__main__':
