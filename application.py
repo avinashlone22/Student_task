@@ -56,15 +56,15 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Routes
-@application.route('/')
-def home():
-    return render_template('home.html')
+
 
 @application.route('/action')
 def action():
     return redirect('/student_dashboard')
 
-
+@application.route('/home')
+def home():
+    return render_template('home.html')
 
 @application.route('/delete_task/<int:task_id>', methods=['POST'])
 def delete_task(task_id):
@@ -289,5 +289,3 @@ if __name__ == '__main__':
     with application.app_context():
         db.create_all()
     application.run(debug=True, host='0.0.0.0', port=8080)
-    
-    
