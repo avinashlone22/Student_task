@@ -5,7 +5,9 @@ View All Students
 {% endblock %}
 
 {% block content %}
-<center><h1 class="text-center mb-4">All Students</h1></center>
+<div style="text-align: center;">
+    <h1 class="text-center mb-4">All Students</h1>
+</div>
 
 <!-- Search Form -->
 <form action="{{ url_for('view_students2') }}" method="POST" class="mb-4">

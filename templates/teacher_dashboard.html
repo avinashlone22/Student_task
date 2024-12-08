@@ -3,17 +3,19 @@
 {% block content %}
 <div class="container">
     <!-- Dashboard Title -->
-    <center><h1>Teacher Dashboard</h1></center>
-    <center><h2>Assign a Task to Students</h2></center>
+    <div style="text-align: center;">
+        <h1>Teacher Dashboard</h1>
+    </div>
+    <div style="text-align: center;">
+        <h2>Assign a Task to Students</h2>
+    </div>
 
     <!-- Flexbox Container for Assign Task and Search Form Side by Side -->
     <div class="row">
 
-        <center>  
-            <div class="container mt-5">
-                <a href="{{ url_for('view_students') }}" class="btn btn-primary view-btn">View All Students</a>
-            </div>
-        </center>
+        <div class="container mt-5" style="text-align: center;">
+            <a href="{{ url_for('view_students') }}" class="btn btn-primary view-btn">View All Students</a>
+        </div>
         
         <!-- Assign Task Form -->
         <div class="col-md-6">
@@ -34,7 +36,9 @@
 
         <!-- Search Student Form -->
         <div class="col-md-6">
-            <center><h2>Search Student By Roll No.</h2></center>
+            <div style="text-align: center;">
+                <h2>Search Student By Roll No.</h2>
+            </div>
             <form method="GET" action="{{ url_for('teacher_dashboard') }}" class="form-inline mb-3">
                 <input type="text" name="search_roll_number" class="form-control mr-2" placeholder="Enter Roll Number" value="{{ search_roll_number or '' }}">
                 <button type="submit" class="btn btn-primary">Search</button>
@@ -46,7 +50,9 @@
     <hr>
 
     <!-- Display Assigned Tasks -->
-    <center><h2>Assigned Tasks</h2></center>
+    <div style="text-align: center;">
+        <h2>Assigned Tasks</h2>
+    </div>
     <div class="table-responsive">
         <table class="table table-bordered table-striped">
             <thead>

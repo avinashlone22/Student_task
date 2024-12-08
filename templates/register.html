@@ -3,10 +3,11 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-<center><h1>Register</h1></center>
+<div style="text-align: center;">
+    <h1>Register</h1>
+</div>
 
 <!-- Display flash messages -->
-
 
 <form method="POST" action="/register">
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -17,7 +18,7 @@
             {% endfor %}
         </ul>
     {% endif %}
-{% endwith %}
+    {% endwith %}
     <label for="username">Username</label>
     <input type="text" id="username" name="username" required>
 
