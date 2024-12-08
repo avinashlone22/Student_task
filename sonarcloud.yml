@@ -39,14 +39,14 @@ phases:
     commands:
       - echo "Running Maven SonarCloud analysis..."
       - mvn sonar:sonar \
-            -Dsonar.login=$SONARCLOUD_TOKEN \
-            -Dsonar.host.url=$HOST \
-            -Dsonar.projectKey=$PROJECTKEY \
-            -Dsonar.organization=$SONARCLOUD_ORG
+          -Dsonar.login=$SONARCLOUD_TOKEN \
+          -Dsonar.host.url=$HOST \
+          -Dsonar.projectKey=$PROJECTKEY \
+          -Dsonar.organization=$SONARCLOUD_ORG
       - echo "SonarCloud analysis completed. Checking Quality Gate status..."
-      - RESPONSE=$(curl -s -u "$SONARCLOUD_TOKEN:" "$HOST/api/qualitygates/project_status?projectKey=$PROJECTKEY" | jq -r '.projectStatus.status')
-      - echo "Quality Gate status: $RESPONSE"
       - |
+        RESPONSE=$(curl -s -u "$SONARCLOUD_TOKEN:" "$HOST/api/qualitygates/project_status?projectKey=$PROJECTKEY" | jq -r '.projectStatus.status')
+        echo "Quality Gate status: $RESPONSE"
         if [ "$RESPONSE" != "OK" ]; then 
           echo "Quality Gate failed."
           exit 1
