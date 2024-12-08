@@ -44,7 +44,7 @@ class Task(db.Model):
 
 # Utility function to query the database
 def query_db(query, args=(), one=False):
-    with sqlite3.connect(DATABASE) as conn:
+    with sqlite3.connect(db) as conn:
         cursor = conn.cursor()
         cursor.execute(query, args)
         conn.commit()
@@ -288,3 +288,5 @@ if __name__ == '__main__':
     with application.app_context():
         db.create_all()
     application.run(debug=True, host='0.0.0.0', port=8080)
+    
+    
