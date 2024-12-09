@@ -57,11 +57,12 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Routes
+
+
+
 @application.route('/home')
 def home():
-    template_path = os.path.join(application.template_folder, 'home.html')
-    print(f"Looking for template at: {template_path}")
-    return render_template('home.html')
+    return render_template('home.html')  # Ensure 'home.html' exists
 
 
 @application.route('/action')
@@ -287,6 +288,8 @@ def index():
 @application.route('/health')
 def health_check():
     return "OK", 200
+    
+    
 
 @application.route('/debug')
 def debug():
