@@ -34,3 +34,7 @@ phases:
       - sleep 5
       # Check the HTTP response status code directly
       - if curl -s -o /dev/null -w "%{http_code}" https://sonarcloud.io/api/qualitygates/project_status?projectKey=$PROJECTKEY != "200"; then exit 1; fi
+
+artifacts:
+   files:
+    - '*/'
