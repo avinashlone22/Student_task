@@ -6,7 +6,8 @@ from datetime import datetime
 from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 
-application = Flask(__name__, template_folder='templates')
+application = Flask(__name__)
+
 
 base_dir=os.path.abspath(os.path.dirname(__file__))
 application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(base_dir , "avi.db")
@@ -60,6 +61,7 @@ def allowed_file(filename):
 
 
 
+from flask import render_template
 @application.route('/home')
 def home():
     return render_template('home.html')  # Ensure 'home.html' exists
