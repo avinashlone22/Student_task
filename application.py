@@ -298,6 +298,18 @@ def debug():
     })
 
 
+
+
+@application.route('/debug/templates')
+def debug_templates():
+    import os
+    return jsonify({
+        "templates_folder": application.template_folder,
+        "template_files": os.listdir(application.template_folder)
+    })
+    
+    
+
 if __name__ == '__main__':
     with application.app_context():
         db.create_all()
