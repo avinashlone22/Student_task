@@ -318,7 +318,8 @@ def debug_templates():
 if __name__ == '__main__':
     with application.app_context():
         db.create_all()
-    application.run(debug=True, host='0.0.0.0', port=8080)
+        application.run()   
+  #  application.run(debug=True, host='0.0.0.0', port=8080)
 
 
 #dhfhdhfhdwj
