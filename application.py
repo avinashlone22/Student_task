@@ -1,40 +1,41 @@
+"""
+This module implements a Flask application for managing student tasks, including
+user authentication, task assignment, and file uploads.
+"""
 import os
-from flask import Flask, render_template, request, redirect, session, url_for, flash, send_from_directory
 import sqlite3
-from werkzeug.utils import secure_filename
-from datetime import datetime
-from flask import jsonify
+from flask import (Flask, render_template, request, redirect, session, url_for,
+                   flash, send_from_directory, jsonify)
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.utils import secure_filename
 
+# Application initialization
 application = Flask(__name__)
 
+# Database configuration
+base_dir = os.path.abspath(os.path.dirname(__file__))
+application.config['SQLALCHEMY_DATABASE_URI'] = (
+    'sqlite:///' + os.path.join(base_dir, "avi.db")
+)
+application.config['UPLOAD_FOLDER'] = '/tmp/uploads'
 
-base_dir=os.path.abspath(os.path.dirname(__file__))
-application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(base_dir , "avi.db")
-db = SQLAlchemy(application)
-
-
-
-
+os.makedirs(application.config['UPLOAD_FOLDER'], exist_ok=True)
 application.secret_key = os.getenv('FLASK_SECRET_KEY', 'your_secret_key_here')
-
-
-# File upload configuration
-UPLOAD_FOLDER = '/tmp/uploads'  # Recommended writable directory for Elastic Beanstalk
-  # Recommended for Elastic Beanstalk
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-application.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
-# Database Models
-class User(db.Model):
+db = SQLAlchemy(application)
+
+
+class User(db.Model):  # pylint: disable=too-few-public-methods
+    """Database model for users."""
+    """Represents a user with username, password, and roll number."""
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     roll_number = db.Column(db.Integer, unique=True, nullable=False)
-
 class Task(db.Model):
+    """Represents a task assigned to students."""
     id = db.Column(db.Integer, primary_key=True)
     student_name = db.Column(db.String(100), nullable=False)
     task = db.Column(db.String(255), nullable=False)
@@ -45,8 +46,13 @@ class Task(db.Model):
     deadline = db.Column(db.String(50))
     remark = db.Column(db.String(255))
 
-# Utility function to query the database
+# Utility functions
+def allowed_file(filename):
+    """Checks if the uploaded file has an allowed extension."""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 def query_db(query, args=(), one=False):
+    """Executes a raw SQL query on the database."""
     with sqlite3.connect(db) as conn:
         cursor = conn.cursor()
         cursor.execute(query, args)
@@ -54,26 +60,27 @@ def query_db(query, args=(), one=False):
         rv = cursor.fetchall()
         return (rv[0] if rv else None) if one else rv
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 # Routes
 
 
 
-from flask import render_template
+
 @application.route('/home')
 def home():
-    return render_template('home.html')  # Ensure 'home.html' exists
+    """Renders the home page."""
+    return render_template('home.html')
 
 
 @application.route('/action')
 def action():
+    """Redirects to the student dashboard."""
     return redirect('/student_dashboard')
+
 
 
 @application.route('/delete_task/<int:task_id>', methods=['POST'])
 def delete_task(task_id):
+    """ handle deletion task """
     if 'user' not in session or session['user'] != 'teacher':
         return redirect('/login')
 
@@ -87,8 +94,8 @@ def delete_task(task_id):
 
     return redirect('/teacher_dashboard')
 
-@application.route('/login', methods=['GET', 'POST'])
 def login():
+    """Handles user login for teachers and students."""
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -110,6 +117,7 @@ def login():
 
 @application.route('/register', methods=['GET', 'POST'])
 def register():
+    """Handles user regestration for teachers and students."""
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -138,11 +146,13 @@ def register():
 
 @application.route('/view_students', methods=['GET', 'POST'])
 def view_students():
+    """Handles user viewing  for students."""
     students = User.query.all()
     return render_template('students.html', students=students)
 
 @application.route('/students2', methods=['GET', 'POST'])
 def view_students2():
+    """Handles user viewing for  students."""
     search_query = request.form.get('search_query', '')
     if search_query:
         students = User.query.filter(User.roll_number == search_query).all()
@@ -153,6 +163,7 @@ def view_students2():
 
 @application.route('/delete_student/<int:student_id>', methods=['POST'])
 def delete_student(student_id):
+    """Handles user delete for students."""
     if request.form.get('_method') == 'DELETE':
         student = User.query.get(student_id)
         if student:
@@ -166,6 +177,7 @@ def delete_student(student_id):
 
 @application.route('/submit_task/<int:task_id>', methods=['GET', 'POST'])
 def submit_task(task_id):
+    """Handles user submit task for  students."""
     task = Task.query.get_or_404(task_id)
     if request.method == 'POST':
         description = request.form.get('description', '').strip()
@@ -192,6 +204,7 @@ def submit_task(task_id):
 
 @application.route('/teacher_dashboard', methods=['GET', 'POST'])
 def teacher_dashboard():
+    """Handles dashboard  for teachers ."""
     if 'user' not in session or session['user'] != 'teacher':
         return redirect('/login')
 
@@ -222,7 +235,10 @@ def teacher_dashboard():
         flash('Task assigned to all students.', 'success')
 
     if search_roll_number:
-        tasks = db.session.query(Task, User).join(User, Task.student_name == User.username).filter(User.roll_number == search_roll_number).all()
+        tasks = db.session.query(Task, User).join(
+            User, Task.student_name == User.username
+        ).all()
+
     else:
         tasks = db.session.query(Task, User).join(User, Task.student_name == User.username).all()
 
@@ -230,6 +246,7 @@ def teacher_dashboard():
 
 @application.route('/update_remark/<int:task_id>', methods=['POST'])
 def update_remark(task_id):
+    """Handles updaion remark for teachers."""
     if 'user' not in session or session['user'] != 'teacher':
         return redirect('/login')
 
@@ -247,6 +264,7 @@ def update_remark(task_id):
 
 @application.route('/student_dashboard')
 def student_dashboard():
+    """Handles user login for  students."""
     if 'user' not in session:
         return redirect('/login')
 
@@ -258,6 +276,7 @@ def student_dashboard():
 
 @application.route('/view_task_file/<int:task_id>')
 def view_task_file(task_id):
+    """Handles user viewing file for teachers and students."""
     task = Task.query.get_or_404(task_id)
     if not task.file_path:
         flash('No file uploaded for this task.', 'warning')
@@ -278,6 +297,7 @@ def view_task_file(task_id):
 
 @application.route('/logout')
 def logout():
+    """Handles user logout for teachers and students."""
     session.pop('user', None)
     return redirect(url_for('login'))
 
@@ -285,17 +305,17 @@ def logout():
 
 @application.route('/')
 def index():
+    """Handles index ."""
     return redirect('/home')
 
 @application.route('/health')
 def health_check():
+    """Handles health check."""
     return "OK", 200
-    
-    
 
 @application.route('/debug')
 def debug():
-    import os
+    """Handles debug ."""
     return jsonify({
         'cwd': os.getcwd(),
         'templates': os.listdir(os.path.join(application.root_path, 'templates')),
@@ -305,21 +325,14 @@ def debug():
 
 
 
-@application.route('/debug/templates')
 def debug_templates():
-    import os
+    """Debugs template folder content."""
     return jsonify({
         "templates_folder": application.template_folder,
-        "template_files": os.listdir(application.template_folder)
+        "template_files": os.listdir(application.template_folder)  
     })
-    
-    
-
 if __name__ == '__main__':
     with application.app_context():
         db.create_all()
-        application.run()   
-  #  application.run(debug=True, host='0.0.0.0', port=8080)
-
-
-#dhfhdhfhdwj
+        application.run()   #  application.run(debug=True, host='0.0.0.0', port=8080)
+        
