@@ -28,6 +28,8 @@ db = SQLAlchemy(application)
 
 
 class User(db.Model):  # pylint: disable=too-few-public-methods
+    # pylint: disable=too-few-public-methods
+    # ... existing code ...
     """Database model for users."""
     """Represents a user with username, password, and roll number."""
     id = db.Column(db.Integer, primary_key=True)
@@ -57,8 +59,8 @@ def query_db(query, args=(), one=False):
         cursor = conn.cursor()
         cursor.execute(query, args)
         conn.commit()
-        rv = cursor.fetchall()
-        return (rv[0] if rv else None) if one else rv
+        result = cursor.fetchall()
+        return (result[0] if result else None) if one else result
 
 # Routes
 
@@ -242,9 +244,7 @@ def teacher_dashboard():
 
         db.session.commit()
         flash('Task assigned to all students.', 'success')
-
     return render_template('teacher_dashboard.html', tasks=tasks)
-    
 @application.route('/update_remark/<int:task_id>', methods=['POST'])
 def update_remark(task_id):
     """Handles updaion remark for teachers."""
