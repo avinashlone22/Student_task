@@ -16,11 +16,6 @@ phases:
       - pylint $CODEBUILD_SRC_DIR/*.py  # Static analysis for top-level Python files
       - echo "Pre-build checks completed."
 
-  build:
-    commands:
-      - echo "Building the applicationlication..."
-      - python application.py  # Start the Flask application for testing purposes (if necessary)
-
   post_build:
     commands:
       - echo "Post-build phase completed."
