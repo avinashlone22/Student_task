@@ -4,10 +4,9 @@ user authentication, task assignment, and file uploads.
 """
 import os
 import sqlite3
-from datetime import datetime
-from flask import Flask, render_template, request,redirect, session, url_for, flash, send_from_directory
+from flask import (Flask, render_template, request,redirect,
+session, url_for, flash, send_from_directory, jsonify)
 from werkzeug.utils import secure_filename
-from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 application = Flask(__name__)
@@ -54,8 +53,8 @@ def query_db(query, args=(), one=False):
         cursor = conn.cursor()
         cursor.execute(query, args)
         conn.commit()
-        rv = cursor.fetchall()
-        return (rv[0] if rv else None) if one else rv
+        result = cursor.fetchall()
+        return (result[0] if result else None) if one else result
 
 def allowed_file(filename):
     """ allowed files  ."""
@@ -290,7 +289,7 @@ def view_task_file(task_id):
 
 @application.route('/logout')
 def logout():
-    " kogout ."""
+    " logout ."""
     session.pop('user', None)
     return redirect(url_for('login'))
 
@@ -303,7 +302,6 @@ def index():
 def health_check():
     """ health ."""
     return "OK", 200
-    
 @application.route('/debug')
 def debug():
     """ debug ."""
@@ -324,6 +322,6 @@ def debug_templates():
 if __name__ == '__main__':
     with application.app_context():
         db.create_all()
-        application.run()   
+        application.run()
   #  application.run(debug=True, host='0.0.0.0', port=8080)
   
