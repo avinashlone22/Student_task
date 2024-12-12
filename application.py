@@ -204,12 +204,21 @@ def submit_task(task_id):
 
 @application.route('/teacher_dashboard', methods=['GET', 'POST'])
 def teacher_dashboard():
-    """Handles dashboard  for teachers ."""
+    """ teacher dashboard """
     if 'user' not in session or session['user'] != 'teacher':
         return redirect('/login')
 
     search_roll_number = request.args.get('search_roll_number')
-    tasks = []
+
+    # Define the base query
+    tasks_query = db.session.query(Task, User).join(User, Task.student_name == User.username)
+
+    if search_roll_number:
+        # Filter tasks based on the search roll number
+        tasks = tasks_query.filter(User.roll_number == search_roll_number).all()
+    else:
+        # Retrieve all tasks
+        tasks = tasks_query.all()
 
     if request.method == 'POST':
         task_name = request.form['task']
@@ -234,16 +243,8 @@ def teacher_dashboard():
         db.session.commit()
         flash('Task assigned to all students.', 'success')
 
-    if search_roll_number:
-        tasks = db.session.query(Task, User).join(
-            User, Task.student_name == User.username
-        ).all()
-
-    else:
-        tasks = db.session.query(Task, User).join(User, Task.student_name == User.username).all()
-
     return render_template('teacher_dashboard.html', tasks=tasks)
-
+    
 @application.route('/update_remark/<int:task_id>', methods=['POST'])
 def update_remark(task_id):
     """Handles updaion remark for teachers."""
